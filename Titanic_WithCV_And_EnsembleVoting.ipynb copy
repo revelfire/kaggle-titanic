@@ -1,0 +1,1076 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# 1. Explore The Data\n",
+    "Most notebooks/kernels you find will provide an overview of the exploration of the data. One technique I like is to do the data exploration and feature engineering in one notebook, and the output of that becomes the input to a second notebook that deals with modeling and submission generation. In this case we will do all-in-one to keep it simple.\n",
+    "\n",
+    "## Titanic Playground\n",
+    "One thing that makes the Titanic competition great for newcomers is that the output variable is a \"dichotomous categorical\" variable which is a mathy way of saying \"binary\" or \"boolean\" or \"having only 2 possibilities, yes/no, 1/0\" - that kind of thing.  This makes things a bit easier in modeling and calculating accuracy."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 15,
+   "metadata": {
+    "collapsed": true
+   },
+   "outputs": [],
+   "source": [
+    "# Import some common libraries for Python\n",
+    "import pandas as pd # A \"Dataframe\" library which essentially treats a dataset like a database table\n",
+    "import numpy as np # A numerical library useful for all sorts of tricks like algebraic functions and matrix multiplication"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 16,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "# Training Records: 891\n",
+      "# Testing Records: 418\n"
+     ]
+    },
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style>\n",
+       "    .dataframe thead tr:only-child th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: left;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>PassengerId</th>\n",
+       "      <th>Survived</th>\n",
+       "      <th>Pclass</th>\n",
+       "      <th>Name</th>\n",
+       "      <th>Sex</th>\n",
+       "      <th>Age</th>\n",
+       "      <th>SibSp</th>\n",
+       "      <th>Parch</th>\n",
+       "      <th>Ticket</th>\n",
+       "      <th>Fare</th>\n",
+       "      <th>Cabin</th>\n",
+       "      <th>Embarked</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "      <td>3</td>\n",
+       "      <td>Braund, Mr. Owen Harris</td>\n",
+       "      <td>male</td>\n",
+       "      <td>22.0</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "      <td>A/5 21171</td>\n",
+       "      <td>7.2500</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>S</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>2</td>\n",
+       "      <td>1</td>\n",
+       "      <td>1</td>\n",
+       "      <td>Cumings, Mrs. John Bradley (Florence Briggs Th...</td>\n",
+       "      <td>female</td>\n",
+       "      <td>38.0</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "      <td>PC 17599</td>\n",
+       "      <td>71.2833</td>\n",
+       "      <td>C85</td>\n",
+       "      <td>C</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>3</td>\n",
+       "      <td>1</td>\n",
+       "      <td>3</td>\n",
+       "      <td>Heikkinen, Miss. Laina</td>\n",
+       "      <td>female</td>\n",
+       "      <td>26.0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>STON/O2. 3101282</td>\n",
+       "      <td>7.9250</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>S</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>4</td>\n",
+       "      <td>1</td>\n",
+       "      <td>1</td>\n",
+       "      <td>Futrelle, Mrs. Jacques Heath (Lily May Peel)</td>\n",
+       "      <td>female</td>\n",
+       "      <td>35.0</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "      <td>113803</td>\n",
+       "      <td>53.1000</td>\n",
+       "      <td>C123</td>\n",
+       "      <td>S</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>5</td>\n",
+       "      <td>0</td>\n",
+       "      <td>3</td>\n",
+       "      <td>Allen, Mr. William Henry</td>\n",
+       "      <td>male</td>\n",
+       "      <td>35.0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>373450</td>\n",
+       "      <td>8.0500</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>S</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "   PassengerId  Survived  Pclass  \\\n",
+       "0            1         0       3   \n",
+       "1            2         1       1   \n",
+       "2            3         1       3   \n",
+       "3            4         1       1   \n",
+       "4            5         0       3   \n",
+       "\n",
+       "                                                Name     Sex   Age  SibSp  \\\n",
+       "0                            Braund, Mr. Owen Harris    male  22.0      1   \n",
+       "1  Cumings, Mrs. John Bradley (Florence Briggs Th...  female  38.0      1   \n",
+       "2                             Heikkinen, Miss. Laina  female  26.0      0   \n",
+       "3       Futrelle, Mrs. Jacques Heath (Lily May Peel)  female  35.0      1   \n",
+       "4                           Allen, Mr. William Henry    male  35.0      0   \n",
+       "\n",
+       "   Parch            Ticket     Fare Cabin Embarked  \n",
+       "0      0         A/5 21171   7.2500   NaN        S  \n",
+       "1      0          PC 17599  71.2833   C85        C  \n",
+       "2      0  STON/O2. 3101282   7.9250   NaN        S  \n",
+       "3      0            113803  53.1000  C123        S  \n",
+       "4      0            373450   8.0500   NaN        S  "
+      ]
+     },
+     "execution_count": 16,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# Load the datasets and take a peek at the record content\n",
+    "train_df = pd.read_csv('./data/train.csv', header=0)        # Load the train file into a dataframe\n",
+    "test_df = pd.read_csv('./data/test.csv', header=0)        # Load the train file into a dataframe\n",
+    "\n",
+    "print(\"# Training Records: \" + str(len(train_df)))\n",
+    "print(\"# Testing Records: \" + str(len(test_df)))\n",
+    "\n",
+    "train_df.head()\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "So we've got a fairly small dataset, and training set is roughly double the size of the test set. We've got a smallish number of columns, and they seem to be fairly well laid out."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 17,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "PassengerId    [[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 1...\n",
+       "Survived                                                [[0, 1]]\n",
+       "Pclass                                               [[3, 1, 2]]\n",
+       "Name           [[Braund, Mr. Owen Harris, Cumings, Mrs. John ...\n",
+       "Sex                                             [[male, female]]\n",
+       "Age            [[22.0, 38.0, 26.0, 35.0, nan, 54.0, 2.0, 27.0...\n",
+       "SibSp                                    [[1, 0, 3, 4, 2, 5, 8]]\n",
+       "Parch                                    [[0, 1, 2, 5, 3, 4, 6]]\n",
+       "Ticket         [[A/5 21171, PC 17599, STON/O2. 3101282, 11380...\n",
+       "Fare           [[7.25, 71.2833, 7.925, 53.1, 8.05, 8.4583, 51...\n",
+       "Cabin          [[nan, C85, C123, E46, G6, C103, D56, A6, C23 ...\n",
+       "Embarked                                        [[S, C, Q, nan]]\n",
+       "dtype: object"
+      ]
+     },
+     "execution_count": 17,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "#Now we've seen the data sample, let's ask about the values\n",
+    "train_df.apply(lambda x: [x.unique()])"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Seems pretty clear that Pclass, Sex, and maybe age could be good predictors.  I'm less excited about the \"continuous\" variables (PassengerId, Ticket, Fare, Cabin), though who knows they could be useful.  Of interest also are SibSp \"Number of siblings/spouses aboard\" and Parch \"Number of parents/children aboard\". \n",
+    "\n",
+    "Often though is useful to keep your model simple to start, and add complexity when needed as you are trying to optimize accuracy."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Parch and SiSp seem like they might be interesting predictors but likely would be best\n",
+    "served by some feature engineering. We'll have to look closer."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 18,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "array([0, 1, 2, 5, 3, 4, 6])"
+      ]
+     },
+     "execution_count": 18,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "train_df.Parch.unique() #Number of parents/children aboard"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 19,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "array([1, 0, 3, 4, 2, 5, 8])"
+      ]
+     },
+     "execution_count": 19,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "train_df.SibSp.unique() #Number of siblings/spouses aboard"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 20,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style>\n",
+       "    .dataframe thead tr:only-child th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: left;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>PassengerId</th>\n",
+       "      <th>Pclass</th>\n",
+       "      <th>Name</th>\n",
+       "      <th>Sex</th>\n",
+       "      <th>Age</th>\n",
+       "      <th>SibSp</th>\n",
+       "      <th>Parch</th>\n",
+       "      <th>Ticket</th>\n",
+       "      <th>Fare</th>\n",
+       "      <th>Cabin</th>\n",
+       "      <th>Embarked</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>892</td>\n",
+       "      <td>3</td>\n",
+       "      <td>Kelly, Mr. James</td>\n",
+       "      <td>male</td>\n",
+       "      <td>34.5</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>330911</td>\n",
+       "      <td>7.8292</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>Q</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>893</td>\n",
+       "      <td>3</td>\n",
+       "      <td>Wilkes, Mrs. James (Ellen Needs)</td>\n",
+       "      <td>female</td>\n",
+       "      <td>47.0</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "      <td>363272</td>\n",
+       "      <td>7.0000</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>S</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>894</td>\n",
+       "      <td>2</td>\n",
+       "      <td>Myles, Mr. Thomas Francis</td>\n",
+       "      <td>male</td>\n",
+       "      <td>62.0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>240276</td>\n",
+       "      <td>9.6875</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>Q</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>895</td>\n",
+       "      <td>3</td>\n",
+       "      <td>Wirz, Mr. Albert</td>\n",
+       "      <td>male</td>\n",
+       "      <td>27.0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>315154</td>\n",
+       "      <td>8.6625</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>S</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>896</td>\n",
+       "      <td>3</td>\n",
+       "      <td>Hirvonen, Mrs. Alexander (Helga E Lindqvist)</td>\n",
+       "      <td>female</td>\n",
+       "      <td>22.0</td>\n",
+       "      <td>1</td>\n",
+       "      <td>1</td>\n",
+       "      <td>3101298</td>\n",
+       "      <td>12.2875</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>S</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "   PassengerId  Pclass                                          Name     Sex  \\\n",
+       "0          892       3                              Kelly, Mr. James    male   \n",
+       "1          893       3              Wilkes, Mrs. James (Ellen Needs)  female   \n",
+       "2          894       2                     Myles, Mr. Thomas Francis    male   \n",
+       "3          895       3                              Wirz, Mr. Albert    male   \n",
+       "4          896       3  Hirvonen, Mrs. Alexander (Helga E Lindqvist)  female   \n",
+       "\n",
+       "    Age  SibSp  Parch   Ticket     Fare Cabin Embarked  \n",
+       "0  34.5      0      0   330911   7.8292   NaN        Q  \n",
+       "1  47.0      1      0   363272   7.0000   NaN        S  \n",
+       "2  62.0      0      0   240276   9.6875   NaN        Q  \n",
+       "3  27.0      0      0   315154   8.6625   NaN        S  \n",
+       "4  22.0      1      1  3101298  12.2875   NaN        S  "
+      ]
+     },
+     "execution_count": 20,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# Take a look at Test data as well. Note the \"survived\" column is absent - that's the thing we are trying to predict.\n",
+    "test_df.head()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# 2. Clean The Data/Correct Missingness\n",
+    "This dataset is not as complex as many. There might be some opportunity to use \"interpolation\" and other missing-value techniques (note the 'nan' on Embarked, Cabin) but we'll want to keep this simple.  Some systems have you dropping rows that don't have data you care about, others have you guessing at values based on median or other techniques...etc.\n",
+    "\n",
+    "Another point to note is this cleaning and correcting often occurs again when we go about the Feature Engineering process. \n",
+    "\n",
+    "## Structure\n",
+    "Part of this process usually involves trying to represent your data as \"tidy data\": https://cran.r-project.org/web/packages/tidyr/vignettes/tidy-data.html \n",
+    "\n",
+    ">In tidy data:\n",
+    "\n",
+    ">1. Each variable forms a column.\n",
+    "\n",
+    ">1. Each observation forms a row.\n",
+    "\n",
+    ">1. Each type of observational unit forms a table.\n",
+    "\n",
+    "In this process we try to represent the data in the described fashion, making it easier for statistical processing to work. Fortunately in this case, the data is well structured/tidy to begin with, so we'll just truncate the columns we don't think we're going to use."
+   ]
+  },
+  {
+   "cell_type": "raw",
+   "metadata": {},
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 21,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style>\n",
+       "    .dataframe thead tr:only-child th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: left;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>PassengerId</th>\n",
+       "      <th>Survived</th>\n",
+       "      <th>Pclass</th>\n",
+       "      <th>Sex</th>\n",
+       "      <th>Age</th>\n",
+       "      <th>SibSp</th>\n",
+       "      <th>Parch</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "      <td>3</td>\n",
+       "      <td>male</td>\n",
+       "      <td>22.0</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>2</td>\n",
+       "      <td>1</td>\n",
+       "      <td>1</td>\n",
+       "      <td>female</td>\n",
+       "      <td>38.0</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>3</td>\n",
+       "      <td>1</td>\n",
+       "      <td>3</td>\n",
+       "      <td>female</td>\n",
+       "      <td>26.0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>4</td>\n",
+       "      <td>1</td>\n",
+       "      <td>1</td>\n",
+       "      <td>female</td>\n",
+       "      <td>35.0</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>5</td>\n",
+       "      <td>0</td>\n",
+       "      <td>3</td>\n",
+       "      <td>male</td>\n",
+       "      <td>35.0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "   PassengerId  Survived  Pclass     Sex   Age  SibSp  Parch\n",
+       "0            1         0       3    male  22.0      1      0\n",
+       "1            2         1       1  female  38.0      1      0\n",
+       "2            3         1       3  female  26.0      0      0\n",
+       "3            4         1       1  female  35.0      1      0\n",
+       "4            5         0       3    male  35.0      0      0"
+      ]
+     },
+     "execution_count": 21,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# And we'll remove Cabin, Embarked, Fare, Ticket, Name in train and test\n",
+    "# (Hint we'll come back later and put Cabin back in to do Feature Engineering to create Deck variable)\n",
+    "test_df.drop(['Cabin', 'Embarked', 'Fare', 'Ticket', 'Name'], axis = 1, inplace = True, errors = 'ignore')\n",
+    "train_df.drop(['Cabin', 'Embarked', 'Fare', 'Ticket', 'Name'], axis = 1, inplace = True, errors = 'ignore')\n",
+    "\n",
+    "\n",
+    "#print(train_df)\n",
+    "#print(list(train_df))\n",
+    "#print(test_df)\n",
+    "\n",
+    "# And look at our updated dataset\n",
+    "train_df.head()\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# 3. Feature Engineering\n",
+    "At this point we have a pretty small data set. It might be interesting to go about running our predictions just based on this alone - after all, sex and class and maybe age seem likely to be highly useful predictors!\n",
+    "\n",
+    "## Logistic Regression\n",
+    "Just for kicks lets run a quick prediction on just this model, then we'll come back and add in some features and see what that does."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 22,
+   "metadata": {
+    "collapsed": true
+   },
+   "outputs": [],
+   "source": [
+    "#We supposedly have a cleaned up dataset now. Let's compare a logistic regression and a random forest.\n",
+    "\n",
+    "from sklearn.linear_model import LogisticRegression\n",
+    "from sklearn import preprocessing\n",
+    "from sklearn import metrics"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 23,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style>\n",
+       "    .dataframe thead tr:only-child th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: left;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>PassengerId</th>\n",
+       "      <th>Survived</th>\n",
+       "      <th>Pclass</th>\n",
+       "      <th>Age</th>\n",
+       "      <th>SibSp</th>\n",
+       "      <th>Parch</th>\n",
+       "      <th>e_Sex</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "      <td>3</td>\n",
+       "      <td>22.0</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "      <td>1</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>2</td>\n",
+       "      <td>1</td>\n",
+       "      <td>1</td>\n",
+       "      <td>38.0</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>3</td>\n",
+       "      <td>1</td>\n",
+       "      <td>3</td>\n",
+       "      <td>26.0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>4</td>\n",
+       "      <td>1</td>\n",
+       "      <td>1</td>\n",
+       "      <td>35.0</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>5</td>\n",
+       "      <td>0</td>\n",
+       "      <td>3</td>\n",
+       "      <td>35.0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>1</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "   PassengerId  Survived  Pclass   Age  SibSp  Parch  e_Sex\n",
+       "0            1         0       3  22.0      1      0      1\n",
+       "1            2         1       1  38.0      1      0      0\n",
+       "2            3         1       3  26.0      0      0      0\n",
+       "3            4         1       1  35.0      1      0      0\n",
+       "4            5         0       3  35.0      0      0      1"
+      ]
+     },
+     "execution_count": 23,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "#Lets make the variables friendly to Scikit - Discuss Encoding\n",
+    "\n",
+    "label_encoder = preprocessing.LabelEncoder()\n",
+    "\n",
+    "train_df = pd.concat([train_df, pd.DataFrame(label_encoder.fit_transform(train_df[\"Sex\"]), columns = ['e_Sex'])], axis=1)\n",
+    "test_df = pd.concat([test_df, pd.DataFrame(label_encoder.fit_transform(test_df[\"Sex\"]), columns = ['e_Sex'])], axis=1)\n",
+    "train_df.drop(['Sex'], axis = 1, inplace = True, errors = 'ignore')\n",
+    "test_df.drop(['Sex'], axis = 1, inplace = True, errors = 'ignore')\n",
+    "\n",
+    "# train_df = pd.concat([train_df, pd.DataFrame(label_encoder.fit_transform(train_df[\"Mother\"]), columns = ['e_Mother'])], axis=1)\n",
+    "# test_df = pd.concat([test_df, pd.DataFrame(label_encoder.fit_transform(test_df[\"Mother\"]), columns = ['e_Mother'])], axis=1)\n",
+    "# train_df.drop(['Mother'], axis = 1, inplace = True, errors = 'ignore')\n",
+    "# test_df.drop(['Mother'], axis = 1, inplace = True, errors = 'ignore')\n",
+    "\n",
+    "# train_df = pd.concat([train_df, pd.DataFrame(label_encoder.fit_transform(train_df[\"Child\"]), columns = ['e_Child'])], axis=1)\n",
+    "# test_df = pd.concat([test_df, pd.DataFrame(label_encoder.fit_transform(test_df[\"Child\"]), columns = ['e_Child'])], axis=1)\n",
+    "# train_df.drop(['Child'], axis = 1, inplace = True, errors = 'ignore')\n",
+    "# test_df.drop(['Child'], axis = 1, inplace = True, errors = 'ignore')\n",
+    "\n",
+    "train_df.head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 27,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Notice that the line of code below `logreg.fit(train_df, Y_train)`  fails. This is because there are \n",
+    "# some lurking nan values. Uncomment the line below to remove them and rerun this cell.\n",
+    "train_df = train_df.dropna(axis=0, how='any')\n",
+    "test_df = test_df.dropna(axis=0, how='any')\n",
+    "\n",
+    "#Set up the Y var (the predictor var)\n",
+    "Y_train = train_df.Survived"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 29,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Logistic Regression Score:0.795518207283\n",
+      "This is not your 'leaderboard score'. It is the 'the mean accuracy on the given test data and labels.'\n"
+     ]
+    }
+   ],
+   "source": [
+    "# Here we first perform a Logistic Regression with no cross-validation activity. \n",
+    "# This is the training data used in full, and the used on the test data.\n",
+    "logreg = LogisticRegression()\n",
+    "\n",
+    "# Drop the survival column as the train/test datasets must match columns\n",
+    "train_df_to_fit = train_df.drop(['Survived'], axis = 1, errors = 'ignore')\n",
+    "\n",
+    "# \"Fit\" the data - create a logicstic regression (single output alg) that \"best fits\" the \n",
+    "#  model. We're still cleaning the data...\n",
+    "logreg.fit(train_df_to_fit, Y_train)\n",
+    "\n",
+    "Y_pred = logreg.predict(test_df)\n",
+    "\n",
+    "print(\"Logistic Regression Score:\" + str(logreg.score(train_df_to_fit, Y_train)))\n",
+    "print(\"This is not your 'leaderboard score'. It is the 'the mean accuracy on the given test data and labels.'\")\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "collapsed": true
+   },
+   "source": [
+    "## What's In A Score? \n",
+    "In the case of the Titanic competition, your leaderboard score is a measure of 'accuracy' which is simply the percentage of correct predictions.\n",
+    "\n",
+    "Scikit-learn.metrics can provide us that.  However right now we don't have the right information. The test dataset doesn't have \"survival\" as that is the predicted variable, so the only way to really get a accuracy measure is to perform a submission.  However, we can generate a proxy to this measure by using a \"hold out\" set.  \n",
+    "\n",
+    "This means that we take some percentage of our data and set it aside AS IF it were the real test data, then we run our model using \"predict\" on the hold out set after the training (fit) pass.  In the case of Titanic, there really isn't enough data for this to be terribly useful, but here we demonstrate the concept.  More often things like \"k-folds cross validation\" are used and we'll show that in a minute, but this is the \"easy version\" of the concept.\n",
+    "\n",
+    "So lets try training again with a smaller set and use 20% of the data as a hold out set so we can get an accuracy score."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 65,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Logistic Regression Score:0.776223776224\n",
+      "This is the best guess we can make right now at a leaderboard score. \n",
+      "You can try to optimize around this output locally and wait to submit until you \n",
+      "have made apparent improvements.\n",
+      "\n",
+      "Lets try it with sklearn accuracy score. This should be the same as above!\n"
+     ]
+    },
+    {
+     "data": {
+      "text/plain": [
+       "0.77622377622377625"
+      ]
+     },
+     "execution_count": 65,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# Note we don't interact with the test set here at all. Just interacting with train\n",
+    "from sklearn.model_selection import train_test_split\n",
+    "\n",
+    "logreg = LogisticRegression()\n",
+    "\n",
+    "train_df_subset, train_df_holdout_test = train_test_split(train_df, test_size = 0.2)\n",
+    "\n",
+    "Y_train = train_df_subset.Survived \n",
+    "train_df_to_fit = train_df_subset.drop(['Survived'], axis = 1, errors = 'ignore')\n",
+    "\n",
+    "# \"Fit\" the data - create a logicstic regression (single output alg) that \"best fits\" the \n",
+    "#  model. We're still cleaning the data...\n",
+    "logreg.fit(train_df_to_fit, Y_train)\n",
+    "\n",
+    "Y_true = train_df_holdout_test.Survived #Correct values\n",
+    "train_df_holdout_test_to_predict = train_df_holdout_test.drop(['Survived'], axis = 1, errors = 'ignore') \n",
+    "\n",
+    "# Run the prediction!\n",
+    "Y_pred = logreg.predict(train_df_holdout_test_to_predict) #Predicted values\n",
+    "\n",
+    "print(\"Logistic Regression Score:\" + str(logreg.score(train_df_holdout_test_to_predict, Y_true)))\n",
+    "print(\"This is the best guess we can make right now at a leaderboard score. \")\n",
+    "print(\"You can try to optimize around this output locally and wait to submit until you \")\n",
+    "print(\"have made apparent improvements.\")\n",
+    "print(\"\")\n",
+    "print(\"Lets try it with sklearn accuracy score. This should be the same as above!\") \n",
+    "metrics.accuracy_score(Y_true, Y_pred)\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# TODO:\n",
+    "1. Local scoring function (accuracy based on train/test/validate k-folds)\n",
+    "1. Some graphs\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 69,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "[ 1.  1.  1.  1.  1.]\n",
+      "RF Accuracy: 1.00 (+/- 0.00)\n"
+     ]
+    }
+   ],
+   "source": [
+    "from sklearn import cross_validation\n",
+    "from sklearn.ensemble import RandomForestClassifier\n",
+    "random_forest = RandomForestClassifier(n_estimators=100)\n",
+    "\n",
+    "Y_train = train_df.Survived \n",
+    "\n",
+    "random_forest.fit(train_df, Y_train)\n",
+    "\n",
+    "#Run some cross validation to randomize the dataset\n",
+    "scores = cross_validation.cross_val_score(random_forest, train_df, Y_train, cv=5)\n",
+    "print(scores)\n",
+    "print(\"RF Accuracy: %0.2f (+/- %0.2f)\" % (scores.mean(), scores.std() * 2))\n",
+    "\n",
+    "Y_pred_RF = random_forest.score(train_df, Y_train)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 10,
+   "metadata": {
+    "collapsed": true
+   },
+   "outputs": [],
+   "source": [
+    "submission = pd.DataFrame({\n",
+    "        \"PassengerId\": test_df[\"PassengerId\"],\n",
+    "        \"Survived\": Y_pred_RF\n",
+    "    })\n",
+    "submission.to_csv('titanic_RF.csv', index=False)\n",
+    "\n",
+    "submission = pd.DataFrame({\n",
+    "        \"PassengerId\": test_df[\"PassengerId\"],\n",
+    "        \"Survived\": Y_pred_logreg\n",
+    "    })\n",
+    "submission.to_csv('titanic_logreg.csv', index=False)\n",
+    "\n",
+    "submission = pd.DataFrame({\n",
+    "        \"PassengerId\": test_df[\"PassengerId\"],\n",
+    "        \"Survived\": Y_pred_NN\n",
+    "    })\n",
+    "submission.to_csv('titanic_nn.csv', index=False)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 11,
+   "metadata": {
+    "collapsed": true
+   },
+   "outputs": [],
+   "source": [
+    "from sklearn.ensemble import VotingClassifier\n",
+    "eclf = VotingClassifier(estimators=[('logreg', logreg), ('rf', random_forest)], \n",
+    "                        voting='soft', weights=[1,1])\n",
+    "eclf = eclf.fit(train_df, Y_train)\n",
+    "Y_ensemble_vote = eclf.predict(test_df)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 12,
+   "metadata": {
+    "collapsed": true
+   },
+   "outputs": [],
+   "source": [
+    "Y_ensemble_vote\n",
+    "submission = pd.DataFrame({\n",
+    "        \"PassengerId\": test_df[\"PassengerId\"],\n",
+    "        \"Survived\": Y_ensemble_vote\n",
+    "    })\n",
+    "submission.to_csv('titanic_ensemble.csv', index=False)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 28,
+   "metadata": {
+    "collapsed": true
+   },
+   "outputs": [],
+   "source": [
+    "outputsDf = pd.DataFrame([Y_pred_RF, Y_pred_logreg, Y_pred_NN])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 31,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "<bound method DataFrame.corr of      0  1  2\n",
+       "0    0  0  0\n",
+       "1    0  1  0\n",
+       "2    0  0  0\n",
+       "3    0  0  0\n",
+       "4    1  1  0\n",
+       "5    0  0  0\n",
+       "6    0  1  0\n",
+       "7    0  0  0\n",
+       "8    1  1  0\n",
+       "9    0  0  0\n",
+       "10   0  0  0\n",
+       "11   0  0  0\n",
+       "12   1  1  1\n",
+       "13   0  0  0\n",
+       "14   1  1  1\n",
+       "15   1  1  1\n",
+       "16   0  0  0\n",
+       "17   0  0  0\n",
+       "18   0  0  0\n",
+       "19   1  1  0\n",
+       "20   1  0  1\n",
+       "21   1  1  0\n",
+       "22   1  1  1\n",
+       "23   1  0  1\n",
+       "24   1  1  1\n",
+       "25   0  0  0\n",
+       "26   1  1  1\n",
+       "27   0  0  0\n",
+       "28   0  0  1\n",
+       "29   0  0  0\n",
+       "..  .. .. ..\n",
+       "388  0  0  0\n",
+       "389  0  0  0\n",
+       "390  0  1  1\n",
+       "391  1  1  1\n",
+       "392  1  1  1\n",
+       "393  0  0  0\n",
+       "394  0  0  0\n",
+       "395  1  1  1\n",
+       "396  0  0  0\n",
+       "397  1  1  1\n",
+       "398  0  0  0\n",
+       "399  0  0  0\n",
+       "400  1  1  1\n",
+       "401  0  0  0\n",
+       "402  1  1  1\n",
+       "403  0  1  1\n",
+       "404  1  0  0\n",
+       "405  0  0  0\n",
+       "406  0  0  0\n",
+       "407  0  0  1\n",
+       "408  1  1  0\n",
+       "409  1  1  0\n",
+       "410  0  1  0\n",
+       "411  1  1  1\n",
+       "412  0  1  0\n",
+       "413  0  0  0\n",
+       "414  1  1  1\n",
+       "415  0  0  0\n",
+       "416  0  0  0\n",
+       "417  1  1  0\n",
+       "\n",
+       "[418 rows x 3 columns]>"
+      ]
+     },
+     "execution_count": 31,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "outputsDF = outputsDf.transpose()\n",
+    "outputsDF.corr"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "collapsed": true
+   },
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 2",
+   "language": "python",
+   "name": "python2"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 2
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython2",
+   "version": "2.7.13"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 1
+}
